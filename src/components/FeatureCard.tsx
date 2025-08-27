@@ -29,7 +29,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         stiffness: 100
       }}
       viewport={{ once: true }}
-      className={`feature-card ${className}`}
+      className={`feature-card group ${className}`}
     >
       <motion.div
         whileHover={{ scale: 1.1, rotate: 5 }}

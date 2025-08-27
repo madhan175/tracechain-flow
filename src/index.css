@@ -161,7 +161,7 @@
   }
 
   .feature-card {
-    @apply blockchain-card group cursor-pointer;
+    @apply blockchain-card cursor-pointer;
     @apply hover:bg-gradient-to-br hover:from-card hover:to-muted/50;
   }
 
