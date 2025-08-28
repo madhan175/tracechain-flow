@@ -20,19 +20,26 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
   const handleScan = (result: any) => {
     if (result) {
       try {
-        // Try to parse as JSON first
-        const parsedData = JSON.parse(data);
+        // Extract text from result
+        const qrText =
+          typeof result === "string" ? result : result?.text || "";
+
+        if (!qrText) return;
+
+        let parsedData;
+        try {
+          parsedData = JSON.parse(qrText);
+        } catch {
+          parsedData = { raw: qrText, timestamp: new Date().toISOString() };
+        }
+
         setScannedData(parsedData);
         setIsScanning(false);
         onScan?.(parsedData);
-        toast.success('QR Code scanned successfully!');
-      } catch {
-        // If not JSON, treat as plain text
-        const textData = { raw: data, timestamp: new Date().toISOString() };
-        setScannedData(textData);
-        setIsScanning(false);
-        onScan?.(textData);
-        toast.success('QR Code scanned successfully!');
+        toast.success("QR Code scanned successfully!");
+      } catch (e) {
+        console.error("Scan parse error:", e);
+        toast.error("Failed to process QR code");
       }
     }
   };
@@ -139,7 +146,9 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
             ) : (
               <div className="p-3 bg-muted rounded-md">
                 <code className="text-sm break-all">
-                  {scannedData.raw || JSON.stringify(scannedData, null, 2)}
+                  {typeof scannedData === "string"
+                    ? scannedData
+                    : JSON.stringify(scannedData, null, 2)}
                 </code>
               </div>
             )}
