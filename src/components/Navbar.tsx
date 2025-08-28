@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Leaf } from 'lucide-react';
 import MetaMaskConnector from './MetaMaskConnector';
+import StacksWalletConnector from './StacksWalletConnector';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,7 @@ const Navbar: React.FC = () => {
     { name: 'About', path: '/about' },
     { name: 'Features', path: '/features' },
     { name: 'Dashboard', path: '/dashboard' },
+    { name: 'QR Tools', path: '/qr-tools' },
     { name: 'Wallet', path: '/wallet' },
     { name: 'Contact', path: '/contact' }
   ];
@@ -63,9 +65,10 @@ const Navbar: React.FC = () => {
             ))}
           </div>
 
-          {/* Desktop Wallet Connector */}
-          <div className="hidden md:block">
+          {/* Desktop Wallet Connectors */}
+          <div className="hidden md:flex items-center gap-3">
             <MetaMaskConnector />
+            <StacksWalletConnector />
           </div>
 
           {/* Mobile menu button */}
@@ -111,9 +114,10 @@ const Navbar: React.FC = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: navItems.length * 0.1 }}
-                  className="pt-4 border-t border-border/50 mt-4"
+                  className="pt-4 border-t border-border/50 mt-4 space-y-3"
                 >
                   <MetaMaskConnector />
+                  <StacksWalletConnector />
                 </motion.div>
               </div>
             </motion.div>

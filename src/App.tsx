@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import WalletPage from "./pages/Wallet";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import TrackProduct from "./pages/TrackProduct";
+import QRTools from "./pages/QRTools";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/wallet" element={<WalletPage />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/track/:productId" element={<TrackProduct />} />
+              <Route path="/qr-tools" element={<QRTools />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
