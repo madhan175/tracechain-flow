@@ -42,7 +42,47 @@ const Home: React.FC = () => {
   }, [slides.length]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary/20 to-trust/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 -left-40 w-96 h-96 bg-gradient-to-br from-secondary/15 to-accent/15 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 180, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-1/4 w-64 h-64 bg-gradient-to-br from-trust/10 to-primary/10 rounded-full blur-2xl"
+          animate={{
+            y: [0, -20, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </div>
+
       {/* Animated Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Image Slider Background */}
@@ -62,8 +102,23 @@ const Home: React.FC = () => {
           />
         </AnimatePresence>
 
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/95" />
+        {/* Enhanced Dark Overlay with Dynamic Gradient */}
+        <motion.div 
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "linear-gradient(135deg, hsl(210 24% 8% / 0.95), hsl(210 100% 12% / 0.9), hsl(174 62% 25% / 0.85))",
+              "linear-gradient(135deg, hsl(174 62% 25% / 0.95), hsl(142 72% 29% / 0.9), hsl(210 24% 8% / 0.85))",
+              "linear-gradient(135deg, hsl(142 72% 29% / 0.95), hsl(210 100% 12% / 0.9), hsl(174 62% 25% / 0.85))",
+              "linear-gradient(135deg, hsl(210 24% 8% / 0.95), hsl(210 100% 12% / 0.9), hsl(174 62% 25% / 0.85))"
+            ]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
         
         {/* Content */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
@@ -192,7 +247,30 @@ const Home: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-card/50 via-background to-muted/30">
+        {/* Floating particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-primary/20 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -100, 0],
+                opacity: [0.2, 0.8, 0.2],
+              }}
+              transition={{
+                duration: 10 + Math.random() * 10,
+                repeat: Infinity,
+                delay: Math.random() * 5,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
+        </div>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
