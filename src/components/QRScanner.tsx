@@ -21,14 +21,14 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
     if (data) {
       try {
         // Try to parse as JSON first
-        const parsedData = JSON.parse(data);
+        const parsedData = JSON.parse(data.text);
         setScannedData(parsedData);
         setIsScanning(false);
         onScan?.(parsedData);
         toast.success('QR Code scanned successfully!');
       } catch {
         // If not JSON, treat as plain text
-        const textData = { raw: data, timestamp: new Date().toISOString() };
+        const textData = { raw: data.text, timestamp: new Date().toISOString() };
         setScannedData(textData);
         setIsScanning(false);
         onScan?.(textData);
@@ -138,7 +138,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
             ) : (
               <div className="p-3 bg-muted rounded-md">
                 <code className="text-sm break-all">
-                  {scannedData.raw || JSON.stringify(scannedData, null, 2)}
+                  {scannedData.raw ? scannedData.raw : JSON.stringify(scannedData, null, 2)}
                 </code>
               </div>
             )}
