@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import QrScanner from 'react-qr-scanner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, CameraOff, Scan, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import QrScanner from "react-qr-scanner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Camera, CameraOff, Scan, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface QRScannerProps {
   onScan?: (data: any) => void;
@@ -15,20 +15,20 @@ interface QRScannerProps {
 const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedData, setScannedData] = useState<any>(null);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
-  const handleScan = (data: any) => {
-    if (data) {
+  const handleScan = (result: any) => {
+    if (result) {
       try {
         // Try to parse as JSON first
-        const parsedData = JSON.parse(data.text);
+        const parsedData = JSON.parse(data);
         setScannedData(parsedData);
         setIsScanning(false);
         onScan?.(parsedData);
         toast.success('QR Code scanned successfully!');
       } catch {
         // If not JSON, treat as plain text
-        const textData = { raw: data.text, timestamp: new Date().toISOString() };
+        const textData = { raw: data, timestamp: new Date().toISOString() };
         setScannedData(textData);
         setIsScanning(false);
         onScan?.(textData);
@@ -38,14 +38,14 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
   };
 
   const handleError = (err: any) => {
-    const errorMessage = err?.message || 'Failed to scan QR code';
+    const errorMessage = err?.message || "Failed to scan QR code";
     setError(errorMessage);
     onError?.(errorMessage);
     toast.error(errorMessage);
   };
 
   const startScanning = () => {
-    setError('');
+    setError("");
     setScannedData(null);
     setIsScanning(true);
   };
@@ -75,10 +75,11 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
             <div className="relative">
               <QrScanner
                 delay={300}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 onError={handleError}
                 onScan={handleScan}
               />
+              {/* Overlay corners */}
               <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none">
                 <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary"></div>
                 <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary"></div>
@@ -86,7 +87,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
                 <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary"></div>
               </div>
             </div>
-            
+
             <Button
               variant="outline"
               onClick={stopScanning}
@@ -108,7 +109,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
         {scannedData && (
           <div className="space-y-3 pt-4 border-t">
             <h4 className="font-medium">Scanned Data:</h4>
-            
+
             {scannedData.id ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -124,7 +125,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
                 {scannedData.trackingUrl && (
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Track:</Badge>
-                    <a 
+                    <a
                       href={scannedData.trackingUrl}
                       className="text-sm text-primary hover:underline"
                       target="_blank"
@@ -138,7 +139,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onScan, onError }) => {
             ) : (
               <div className="p-3 bg-muted rounded-md">
                 <code className="text-sm break-all">
-                  {scannedData.raw ? scannedData.raw : JSON.stringify(scannedData, null, 2)}
+                  {scannedData.raw || JSON.stringify(scannedData, null, 2)}
                 </code>
               </div>
             )}
