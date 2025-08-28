@@ -102,15 +102,15 @@ const Home: React.FC = () => {
           />
         </AnimatePresence>
 
-        {/* Enhanced Dark Overlay with Dynamic Gradient */}
+        {/* Enhanced Dark Overlay with Dynamic Gradient - Reduced opacity for better image visibility */}
         <motion.div 
           className="absolute inset-0"
           animate={{
             background: [
-              "linear-gradient(135deg, hsl(210 24% 8% / 0.95), hsl(210 100% 12% / 0.9), hsl(174 62% 25% / 0.85))",
-              "linear-gradient(135deg, hsl(174 62% 25% / 0.95), hsl(142 72% 29% / 0.9), hsl(210 24% 8% / 0.85))",
-              "linear-gradient(135deg, hsl(142 72% 29% / 0.95), hsl(210 100% 12% / 0.9), hsl(174 62% 25% / 0.85))",
-              "linear-gradient(135deg, hsl(210 24% 8% / 0.95), hsl(210 100% 12% / 0.9), hsl(174 62% 25% / 0.85))"
+              "linear-gradient(135deg, hsl(210 24% 8% / 0.7), hsl(210 100% 12% / 0.6), hsl(174 62% 25% / 0.5))",
+              "linear-gradient(135deg, hsl(174 62% 25% / 0.7), hsl(142 72% 29% / 0.6), hsl(210 24% 8% / 0.5))",
+              "linear-gradient(135deg, hsl(142 72% 29% / 0.7), hsl(210 100% 12% / 0.6), hsl(174 62% 25% / 0.5))",
+              "linear-gradient(135deg, hsl(210 24% 8% / 0.7), hsl(210 100% 12% / 0.6), hsl(174 62% 25% / 0.5))"
             ]
           }}
           transition={{
