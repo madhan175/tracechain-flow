@@ -1,5 +1,9 @@
 # Food Supply Chain - Blockchain-Powered Traceability Platform
 
+TEAM NAME : BUG BUSTERS
+MADHAN D
+DINESHLINGAM M U
+
 ![Food Supply Chain Banner](https://via.placeholder.com/800x200/2D50FC/FFFFFF?text=Food+Supply+Chain+-+Farm+to+Table+Transparency)
 
 A modern, full-stack food supply chain tracking platform leveraging Stacks blockchain for transparent, decentralized food provenance from farm to table.
@@ -291,13 +295,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Vite](https://vitejs.dev/) for fast build tooling
 - [Tailwind CSS](https://tailwindcss.com/) for styling utilities
 
-## 📞 Support
+## 📞 Contant
 
 If you have any questions or need help, please:
 
 1. Check the [documentation](https://github.com/your-username/food-supply-chain/wiki)
 2. Open an [issue](https://github.com/your-username/food-supply-chain/issues)
 3. Join our [community forum](https://discord.gg/your-invite-link)
+4.Intagram 
+
 
 ## 🔮 Roadmap
 
