@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
         id: 1,
         icon: User,
         title: 'Farmer',
-        location: 'Green Valley Farm, California',
+        location: 'chennai',
         timestamp: '2024-01-15 08:00 AM',
         status: 'completed',
         details: 'Harvested organic tomatoes, pesticide-free'
@@ -26,7 +26,7 @@ const Dashboard: React.FC = () => {
         id: 2,
         icon: Factory,
         title: 'Processing',
-        location: 'FreshPack Facility, California',
+        location: 'chennai ',
         timestamp: '2024-01-15 02:30 PM',
         status: 'completed',
         details: 'Quality inspection passed, packaged for distribution'
@@ -35,19 +35,19 @@ const Dashboard: React.FC = () => {
         id: 3,
         icon: Truck,
         title: 'Distribution',
-        location: 'En route to RetailMart Hub',
-        timestamp: '2024-01-16 09:00 AM',
-        status: 'active',
-        details: 'Temperature maintained at 2°C during transport'
+        location: '',
+        timestamp: '',
+        status: '',
+        details: ''
       },
       {
         id: 4,
         icon: Store,
         title: 'Retail',
-        location: 'RetailMart Store #1205',
-        timestamp: 'Expected: 2024-01-17 10:00 AM',
-        status: 'pending',
-        details: 'Awaiting delivery and shelf placement'
+        location: '',
+        timestamp: '',
+        status: '',
+        details: ''
       }
     ]
   };
@@ -162,7 +162,7 @@ const Dashboard: React.FC = () => {
                   onClick={() => setProductId('FC-ORG-2024-001')}
                   className="text-sm text-primary hover:text-primary/80 underline"
                 >
-                  Try demo product: FC-ORG-2024-001
+
                 </button>
               </div>
             </div>

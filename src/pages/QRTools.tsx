@@ -69,7 +69,7 @@ const QRTools = () => {
             <Alert className="mb-6">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Connect your wallet to record products on the blockchain when generating QR codes.
+                Connect wallet to record products on the blockchain when generating QR codes.
               </AlertDescription>
             </Alert>
           )}
@@ -79,7 +79,6 @@ const QRTools = () => {
               <div className="flex items-center gap-2">
                 <Package className="h-5 w-5 text-green-600 dark:text-green-400" />
                 <span className="text-green-800 dark:text-green-200">
-                  Connected to {walletType} wallet - Products will be recorded on blockchain
                 </span>
                 <Badge variant="secondary">
                   {address?.slice(0, 6)}...{address?.slice(-4)}

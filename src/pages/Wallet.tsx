@@ -67,7 +67,7 @@ const WalletPage: React.FC = () => {
             </span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Connect your MetaMask wallet to securely access blockchain-verified food traceability data
+             wallet to securely access blockchain-verified food traceability data
           </p>
         </motion.div>
 
