@@ -9,6 +9,7 @@ import {
   AnchorMode,
   PostConditionMode
 } from '@stacks/transactions';
+
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
@@ -26,8 +27,6 @@ export const addStacksCheckpoint = async (
     throw new Error('User not signed in');
   }
 
-  const userData = userSession.loadUserData();
-  
   try {
     const functionName = isNewProduct ? 'create-product' : 'add-checkpoint';
     let functionArgs;
@@ -53,12 +52,13 @@ export const addStacksCheckpoint = async (
       ];
     }
 
-    // Use openContractCall for better UX
+    // Use openContractCall for better UX with testnet
     await openContractCall({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName,
       functionArgs,
+      network: 'testnet', // Use string instead of network object
       onFinish: (data) => {
         console.log('Transaction ID:', data.txId);
         return data.txId;
@@ -92,6 +92,7 @@ export const verifyStacksCheckpoint = async (
         stringAsciiCV(productId),
         uintCV(checkpointId)
       ],
+      network: 'testnet', // Use string instead of network object
       onFinish: (data) => {
         console.log('Verification Transaction ID:', data.txId);
         return data.txId;
