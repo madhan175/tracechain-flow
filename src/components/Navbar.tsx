@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Features', path: '/features' },
+    { name: 'Supply Chain', path: '/supply-chain' },
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'QR Tools', path: '/qr-tools' },
     { name: 'Wallet', path: '/wallet' },
@@ -67,7 +68,6 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Wallet Connectors */}
           <div className="hidden md:flex items-center gap-3">
-            <MetaMaskConnector />
             <StacksWalletConnector />
           </div>
 
@@ -116,7 +116,6 @@ const Navbar: React.FC = () => {
                   transition={{ delay: navItems.length * 0.1 }}
                   className="pt-4 border-t border-border/50 mt-4 space-y-3"
                 >
-                  <MetaMaskConnector />
                   <StacksWalletConnector />
                 </motion.div>
               </div>
