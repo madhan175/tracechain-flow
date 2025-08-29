@@ -213,8 +213,8 @@ The application uses a modern component library with:
 ### Stacks Blockchain
 - Interact with Clarity contracts using `@stacks/connect`
 - Leather wallet integration for authentication
-- Testnet support with your contract address: `STW42W7AEKZ2EFYH834C6DW9272JHT1PHM92FY88`
-
+- Contract Name - supply-chain
+- Testnet support with your contract address: `STW42W7AEKZ2EFYH834C6DW9272JHT1PHM92FY88.supply-chain'
 ## 📱 Usage Guide
 
 ### For Farmers
