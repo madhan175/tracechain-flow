@@ -1,140 +1,105 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useWallet } from '@/hooks/useWallet';
 import { toast } from 'sonner';
-import { Tractor, Factory, Truck, Store, Shield, QrCode } from 'lucide-react';
+import { Tractor, Truck, Shield } from 'lucide-react';
 import StacksWalletConnector from '@/components/StacksWalletConnector';
-import { addStacksCheckpoint } from '@/utils/stacksIntegration';
+import { createBatch, transferBatch, assignRole, isStacksConnected, getStacksAddress } from '@/utils/stacksIntegration';
 
 const SupplyChain = () => {
-  const { address, isConnected, walletType } = useWallet();
+  const [isConnected, setIsConnected] = useState(false);
+  const [userAddress, setUserAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Form states for each role
+
+  // Form states
   const [farmerForm, setFarmerForm] = useState({
-    productId: '',
+    productName: '',
     batchId: '',
-    location: '',
-    harvestDate: new Date().toISOString().split('T')[0]
+    location: ''
   });
 
-  const [processorForm, setProcessorForm] = useState({
-    productId: '',
-    qualityChecks: '',
-    certifications: '',
-    processingSteps: ''
+  const [transferForm, setTransferForm] = useState({
+    batchId: '',
+    recipientAddress: ''
   });
 
-  const [transporterForm, setTransporterForm] = useState({
-    productId: '',
-    temperature: '',
-    gpsLocation: '',
-    storageConditions: ''
+  const [roleForm, setRoleForm] = useState({
+    userAddress: '',
+    role: 'farmer'
   });
 
-  const [retailerForm, setRetailerForm] = useState({
-    productId: '',
-    stockDetails: '',
-    qrCode: '',
-    shelfLocation: ''
-  });
+  useEffect(() => {
+    checkConnection();
+  }, []);
 
-  const [regulatorForm, setRegulatorForm] = useState({
-    productId: '',
-    checkpointId: '',
-    verificationNotes: ''
-  });
+  const checkConnection = () => {
+    const connected = isStacksConnected();
+    setIsConnected(connected);
+    if (connected) {
+      setUserAddress(getStacksAddress());
+    }
+  };
 
-  const handleFarmerSubmit = async () => {
-    if (!isConnected || walletType !== 'stacks') {
-      toast.error('Please connect your Hiro Wallet first');
+  const handleFarmerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isConnected) {
+      toast.error('Please connect your Hiro wallet first');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await addStacksCheckpoint(
-        farmerForm.productId,
-        'farm',
-        `Harvest - Batch: ${farmerForm.batchId}, Location: ${farmerForm.location}, Date: ${farmerForm.harvestDate}`,
-        true // isNewProduct
-      );
-      
-      toast.success('Harvest details recorded on blockchain!');
-      setFarmerForm({ productId: '', batchId: '', location: '', harvestDate: new Date().toISOString().split('T')[0] });
+      await createBatch(farmerForm.productName);
+      toast.success('Batch created successfully!');
+      setFarmerForm({ productName: '', batchId: '', location: '' });
     } catch (error) {
-      toast.error('Failed to record harvest details');
-      console.error('Farmer submit error:', error);
+      toast.error('Failed to create batch');
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleProcessorSubmit = async () => {
-    if (!isConnected || walletType !== 'stacks') {
-      toast.error('Please connect your Hiro Wallet first');
+  const handleTransferSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isConnected) {
+      toast.error('Please connect your Hiro wallet first');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const data = `Quality: ${processorForm.qualityChecks} | Certs: ${processorForm.certifications} | Steps: ${processorForm.processingSteps}`;
-      await addStacksCheckpoint(processorForm.productId, 'processing', data);
-      
-      toast.success('Processing details recorded on blockchain!');
-      setProcessorForm({ productId: '', qualityChecks: '', certifications: '', processingSteps: '' });
+      await transferBatch(parseInt(transferForm.batchId), transferForm.recipientAddress);
+      toast.success('Batch transferred successfully!');
+      setTransferForm({ batchId: '', recipientAddress: '' });
     } catch (error) {
-      toast.error('Failed to record processing details');
-      console.error('Processor submit error:', error);
+      toast.error('Failed to transfer batch');
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleTransporterSubmit = async () => {
-    if (!isConnected || walletType !== 'stacks') {
-      toast.error('Please connect your Hiro Wallet first');
+  const handleRoleAssignment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isConnected) {
+      toast.error('Please connect your Hiro wallet first');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const data = `Temp: ${transporterForm.temperature}°C | GPS: ${transporterForm.gpsLocation} | Storage: ${transporterForm.storageConditions}`;
-      await addStacksCheckpoint(transporterForm.productId, 'transport', data);
-      
-      toast.success('Transport details recorded on blockchain!');
-      setTransporterForm({ productId: '', temperature: '', gpsLocation: '', storageConditions: '' });
+      await assignRole(roleForm.userAddress, roleForm.role);
+      toast.success('Role assigned successfully!');
+      setRoleForm({ userAddress: '', role: 'farmer' });
     } catch (error) {
-      toast.error('Failed to record transport details');
-      console.error('Transporter submit error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRetailerSubmit = async () => {
-    if (!isConnected || walletType !== 'stacks') {
-      toast.error('Please connect your Hiro Wallet first');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const data = `Stock: ${retailerForm.stockDetails} | QR: ${retailerForm.qrCode} | Location: ${retailerForm.shelfLocation}`;
-      await addStacksCheckpoint(retailerForm.productId, 'retail', data);
-      
-      toast.success('Retail details recorded on blockchain!');
-      setRetailerForm({ productId: '', stockDetails: '', qrCode: '', shelfLocation: '' });
-    } catch (error) {
-      toast.error('Failed to record retail details');
-      console.error('Retailer submit error:', error);
+      toast.error('Failed to assign role');
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -149,16 +114,20 @@ const SupplyChain = () => {
               Supply Chain Management
             </h1>
             <p className="text-lg text-muted-foreground mb-6">
-              Track food products from farm to table using blockchain technology
+              Track your products from farm to table using blockchain technology
             </p>
             
-            {!isConnected && (
-              <div className="flex justify-center mb-6">
-                <StacksWalletConnector />
-              </div>
-            )}
+            <div className="flex justify-center mb-6">
+              <StacksWalletConnector 
+                onConnect={checkConnection}
+                onDisconnect={() => {
+                  setIsConnected(false);
+                  setUserAddress(null);
+                }}
+              />
+            </div>
 
-            {isConnected && walletType === 'stacks' && (
+            {isConnected && (
               <div className="mb-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
                 <div className="flex items-center justify-center gap-2">
                   <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -166,7 +135,7 @@ const SupplyChain = () => {
                     Connected to Stacks Testnet
                   </span>
                   <Badge variant="secondary">
-                    {address?.slice(0, 6)}...{address?.slice(-4)}
+                    {userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}
                   </Badge>
                 </div>
               </div>
@@ -174,313 +143,174 @@ const SupplyChain = () => {
           </div>
 
           <Tabs defaultValue="farmer" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="farmer" className="gap-2">
                 <Tractor className="h-4 w-4" />
-                Farmer
+                Create Batch
               </TabsTrigger>
-              <TabsTrigger value="processor" className="gap-2">
-                <Factory className="h-4 w-4" />
-                Processor
-              </TabsTrigger>
-              <TabsTrigger value="transporter" className="gap-2">
+              <TabsTrigger value="transfer" className="gap-2">
                 <Truck className="h-4 w-4" />
-                Transporter
+                Transfer Batch
               </TabsTrigger>
-              <TabsTrigger value="retailer" className="gap-2">
-                <Store className="h-4 w-4" />
-                Retailer
-              </TabsTrigger>
-              <TabsTrigger value="regulator" className="gap-2">
+              <TabsTrigger value="roles" className="gap-2">
                 <Shield className="h-4 w-4" />
-                Regulator
+                Assign Roles
               </TabsTrigger>
             </TabsList>
 
-            {/* Farmer Tab */}
             <TabsContent value="farmer">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Tractor className="h-5 w-5" />
-                    Record Harvest Details
+                    Create New Batch
                   </CardTitle>
+                  <CardDescription>
+                    Start a new product batch on the blockchain
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-product-id">Product ID</Label>
+                <CardContent>
+                  <form onSubmit={handleFarmerSubmit} className="space-y-4">
+                    <div>
+                      <Label htmlFor="productName">Product Name</Label>
                       <Input
-                        id="farmer-product-id"
-                        value={farmerForm.productId}
-                        onChange={(e) => setFarmerForm({...farmerForm, productId: e.target.value})}
-                        placeholder="PROD-2024-001"
+                        id="productName"
+                        value={farmerForm.productName}
+                        onChange={(e) => setFarmerForm(prev => ({ ...prev, productName: e.target.value }))}
+                        placeholder="e.g., Organic Tomatoes"
+                        required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-batch-id">Batch ID</Label>
+                    
+                    <div>
+                      <Label htmlFor="batchId">Batch ID (Optional)</Label>
                       <Input
-                        id="farmer-batch-id"
+                        id="batchId"
                         value={farmerForm.batchId}
-                        onChange={(e) => setFarmerForm({...farmerForm, batchId: e.target.value})}
-                        placeholder="BATCH-001"
+                        onChange={(e) => setFarmerForm(prev => ({ ...prev, batchId: e.target.value }))}
+                        placeholder="e.g., BATCH-2024-001"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-location">Farm Location</Label>
+                    
+                    <div>
+                      <Label htmlFor="location">Farm Location</Label>
                       <Input
-                        id="farmer-location"
+                        id="location"
                         value={farmerForm.location}
-                        onChange={(e) => setFarmerForm({...farmerForm, location: e.target.value})}
-                        placeholder="California, USA"
+                        onChange={(e) => setFarmerForm(prev => ({ ...prev, location: e.target.value }))}
+                        placeholder="e.g., California, USA"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-date">Harvest Date</Label>
-                      <Input
-                        id="farmer-date"
-                        type="date"
-                        value={farmerForm.harvestDate}
-                        onChange={(e) => setFarmerForm({...farmerForm, harvestDate: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <Separator />
-                  <Button 
-                    onClick={handleFarmerSubmit}
-                    disabled={!isConnected || walletType !== 'stacks' || isSubmitting}
-                    className="w-full"
-                  >
-                    {isSubmitting ? 'Recording...' : 'Record on Blockchain'}
-                  </Button>
+
+                    <Button 
+                      type="submit" 
+                      disabled={!isConnected || isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? 'Creating...' : 'Create Batch'}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Processor Tab */}
-            <TabsContent value="processor">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Factory className="h-5 w-5" />
-                    Log Processing Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="processor-product-id">Product ID</Label>
-                    <Input
-                      id="processor-product-id"
-                      value={processorForm.productId}
-                      onChange={(e) => setProcessorForm({...processorForm, productId: e.target.value})}
-                      placeholder="PROD-2024-001"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="processor-quality">Quality Checks</Label>
-                    <Textarea
-                      id="processor-quality"
-                      value={processorForm.qualityChecks}
-                      onChange={(e) => setProcessorForm({...processorForm, qualityChecks: e.target.value})}
-                      placeholder="Temperature check: 4°C, pH level: 6.5, Visual inspection: Passed"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="processor-certs">Certifications</Label>
-                    <Input
-                      id="processor-certs"
-                      value={processorForm.certifications}
-                      onChange={(e) => setProcessorForm({...processorForm, certifications: e.target.value})}
-                      placeholder="FDA, USDA Organic, ISO 9001"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="processor-steps">Processing Steps</Label>
-                    <Textarea
-                      id="processor-steps"
-                      value={processorForm.processingSteps}
-                      onChange={(e) => setProcessorForm({...processorForm, processingSteps: e.target.value})}
-                      placeholder="Washing, Sorting, Packaging, Labeling"
-                    />
-                  </div>
-                  <Separator />
-                  <Button 
-                    onClick={handleProcessorSubmit}
-                    disabled={!isConnected || walletType !== 'stacks' || isSubmitting}
-                    className="w-full"
-                  >
-                    {isSubmitting ? 'Recording...' : 'Record on Blockchain'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Transporter Tab */}
-            <TabsContent value="transporter">
+            <TabsContent value="transfer">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Truck className="h-5 w-5" />
-                    Upload Transport Data
+                    Transfer Batch
                   </CardTitle>
+                  <CardDescription>
+                    Transfer ownership of a batch to another party
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="transporter-product-id">Product ID</Label>
-                    <Input
-                      id="transporter-product-id"
-                      value={transporterForm.productId}
-                      onChange={(e) => setTransporterForm({...transporterForm, productId: e.target.value})}
-                      placeholder="PROD-2024-001"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="transporter-temp">Temperature (°C)</Label>
+                <CardContent>
+                  <form onSubmit={handleTransferSubmit} className="space-y-4">
+                    <div>
+                      <Label htmlFor="transferBatchId">Batch ID</Label>
                       <Input
-                        id="transporter-temp"
-                        value={transporterForm.temperature}
-                        onChange={(e) => setTransporterForm({...transporterForm, temperature: e.target.value})}
-                        placeholder="4"
+                        id="transferBatchId"
+                        type="number"
+                        value={transferForm.batchId}
+                        onChange={(e) => setTransferForm(prev => ({ ...prev, batchId: e.target.value }))}
+                        placeholder="e.g., 1"
+                        required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="transporter-gps">GPS Location</Label>
+                    
+                    <div>
+                      <Label htmlFor="recipientAddress">Recipient Stacks Address</Label>
                       <Input
-                        id="transporter-gps"
-                        value={transporterForm.gpsLocation}
-                        onChange={(e) => setTransporterForm({...transporterForm, gpsLocation: e.target.value})}
-                        placeholder="37.7749, -122.4194"
+                        id="recipientAddress"
+                        value={transferForm.recipientAddress}
+                        onChange={(e) => setTransferForm(prev => ({ ...prev, recipientAddress: e.target.value }))}
+                        placeholder="e.g., SP1234567890ABCDEF..."
+                        required
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="transporter-storage">Storage Conditions</Label>
-                    <Textarea
-                      id="transporter-storage"
-                      value={transporterForm.storageConditions}
-                      onChange={(e) => setTransporterForm({...transporterForm, storageConditions: e.target.value})}
-                      placeholder="Refrigerated truck, Humidity: 85%, No direct sunlight"
-                    />
-                  </div>
-                  <Separator />
-                  <Button 
-                    onClick={handleTransporterSubmit}
-                    disabled={!isConnected || walletType !== 'stacks' || isSubmitting}
-                    className="w-full"
-                  >
-                    {isSubmitting ? 'Recording...' : 'Record on Blockchain'}
-                  </Button>
+
+                    <Button 
+                      type="submit" 
+                      disabled={!isConnected || isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? 'Transferring...' : 'Transfer Batch'}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Retailer Tab */}
-            <TabsContent value="retailer">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Store className="h-5 w-5" />
-                    Update Stock & QR Code
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="retailer-product-id">Product ID</Label>
-                    <Input
-                      id="retailer-product-id"
-                      value={retailerForm.productId}
-                      onChange={(e) => setRetailerForm({...retailerForm, productId: e.target.value})}
-                      placeholder="PROD-2024-001"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="retailer-stock">Stock Details</Label>
-                    <Textarea
-                      id="retailer-stock"
-                      value={retailerForm.stockDetails}
-                      onChange={(e) => setRetailerForm({...retailerForm, stockDetails: e.target.value})}
-                      placeholder="Quantity: 100 units, Expiry: 2024-12-31, Price: $5.99"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="retailer-qr">QR Code ID</Label>
-                      <Input
-                        id="retailer-qr"
-                        value={retailerForm.qrCode}
-                        onChange={(e) => setRetailerForm({...retailerForm, qrCode: e.target.value})}
-                        placeholder="QR-PROD-2024-001"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="retailer-shelf">Shelf Location</Label>
-                      <Input
-                        id="retailer-shelf"
-                        value={retailerForm.shelfLocation}
-                        onChange={(e) => setRetailerForm({...retailerForm, shelfLocation: e.target.value})}
-                        placeholder="Aisle 3, Section B"
-                      />
-                    </div>
-                  </div>
-                  <Separator />
-                  <Button 
-                    onClick={handleRetailerSubmit}
-                    disabled={!isConnected || walletType !== 'stacks' || isSubmitting}
-                    className="w-full"
-                  >
-                    {isSubmitting ? 'Recording...' : 'Record on Blockchain'}
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Regulator Tab */}
-            <TabsContent value="regulator">
+            <TabsContent value="roles">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="h-5 w-5" />
-                    Verify Compliance
+                    Assign User Roles
                   </CardTitle>
+                  <CardDescription>
+                    Assign roles to users in the supply chain
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="regulator-product-id">Product ID</Label>
+                <CardContent>
+                  <form onSubmit={handleRoleAssignment} className="space-y-4">
+                    <div>
+                      <Label htmlFor="roleUserAddress">User Stacks Address</Label>
                       <Input
-                        id="regulator-product-id"
-                        value={regulatorForm.productId}
-                        onChange={(e) => setRegulatorForm({...regulatorForm, productId: e.target.value})}
-                        placeholder="PROD-2024-001"
+                        id="roleUserAddress"
+                        value={roleForm.userAddress}
+                        onChange={(e) => setRoleForm(prev => ({ ...prev, userAddress: e.target.value }))}
+                        placeholder="e.g., SP1234567890ABCDEF..."
+                        required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="regulator-checkpoint">Checkpoint ID</Label>
-                      <Input
-                        id="regulator-checkpoint"
-                        value={regulatorForm.checkpointId}
-                        onChange={(e) => setRegulatorForm({...regulatorForm, checkpointId: e.target.value})}
-                        placeholder="1"
-                      />
+                    
+                    <div>
+                      <Label htmlFor="userRole">Role</Label>
+                      <select
+                        id="userRole"
+                        value={roleForm.role}
+                        onChange={(e) => setRoleForm(prev => ({ ...prev, role: e.target.value }))}
+                        className="w-full p-2 border rounded-md bg-background"
+                        required
+                      >
+                        <option value="farmer">Farmer</option>
+                        <option value="processor">Processor</option>
+                        <option value="transporter">Transporter</option>
+                        <option value="retailer">Retailer</option>
+                        <option value="regulator">Regulator</option>
+                      </select>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="regulator-notes">Verification Notes</Label>
-                    <Textarea
-                      id="regulator-notes"
-                      value={regulatorForm.verificationNotes}
-                      onChange={(e) => setRegulatorForm({...regulatorForm, verificationNotes: e.target.value})}
-                      placeholder="All safety standards met. Documentation complete. Approved for distribution."
-                    />
-                  </div>
-                  <Separator />
-                  <Button 
-                    disabled={!isConnected || walletType !== 'stacks' || isSubmitting}
-                    className="w-full"
-                  >
-                    {isSubmitting ? 'Verifying...' : 'Verify on Blockchain'}
-                  </Button>
+
+                    <Button 
+                      type="submit" 
+                      disabled={!isConnected || isSubmitting}
+                      className="w-full"
+                    >
+                      {isSubmitting ? 'Assigning...' : 'Assign Role'}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>

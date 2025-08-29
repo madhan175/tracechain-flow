@@ -6,6 +6,7 @@ import {
 import {
   uintCV,
   stringAsciiCV,
+  principalCV,
   AnchorMode,
   PostConditionMode
 } from '@stacks/transactions';
@@ -13,54 +14,24 @@ import {
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
-// Contract details (update these with your deployed contract)
-const CONTRACT_ADDRESS = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM'; // Replace with your contract address
+// Contract details
+const CONTRACT_ADDRESS = 'STW42W7AEKZ2EFYH834C6DW9272JHT1PHM92FY88';
 const CONTRACT_NAME = 'supply-chain';
 
-export const addStacksCheckpoint = async (
-  productId: string,
-  stage: string,
-  data: string,
-  isNewProduct = false
-): Promise<string> => {
+export const createBatch = async (product: string): Promise<string> => {
   if (!userSession.isUserSignedIn()) {
     throw new Error('User not signed in');
   }
 
   try {
-    const functionName = isNewProduct ? 'create-product' : 'add-checkpoint';
-    let functionArgs;
-
-    if (isNewProduct) {
-      // For new products (farmer's initial record)
-      const batchId = data.split('Batch: ')[1]?.split(',')[0] || 'DEFAULT';
-      const location = data.split('Location: ')[1]?.split(',')[0] || 'Unknown';
-      const harvestDate = Math.floor(Date.now() / 1000); // Unix timestamp
-      
-      functionArgs = [
-        stringAsciiCV(productId),
-        stringAsciiCV(batchId),
-        uintCV(harvestDate),
-        stringAsciiCV(location)
-      ];
-    } else {
-      // For adding checkpoints
-      functionArgs = [
-        stringAsciiCV(productId),
-        stringAsciiCV(stage),
-        stringAsciiCV(data)
-      ];
-    }
-
-    // Use openContractCall for better UX with testnet
     await openContractCall({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
-      functionName,
-      functionArgs,
-      network: 'testnet', // Use string instead of network object
+      functionName: 'create-batch',
+      functionArgs: [stringAsciiCV(product)],
+      network: 'testnet',
       onFinish: (data) => {
-        console.log('Transaction ID:', data.txId);
+        console.log('Batch created. Transaction ID:', data.txId);
         return data.txId;
       },
       onCancel: () => {
@@ -68,17 +39,14 @@ export const addStacksCheckpoint = async (
       },
     });
 
-    return 'Transaction initiated';
+    return 'Batch creation initiated';
   } catch (error) {
-    console.error('Error adding checkpoint to Stacks:', error);
+    console.error('Error creating batch:', error);
     throw error;
   }
 };
 
-export const verifyStacksCheckpoint = async (
-  productId: string,
-  checkpointId: number
-): Promise<string> => {
+export const transferBatch = async (batchId: number, newOwner: string): Promise<string> => {
   if (!userSession.isUserSignedIn()) {
     throw new Error('User not signed in');
   }
@@ -87,41 +55,88 @@ export const verifyStacksCheckpoint = async (
     await openContractCall({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
-      functionName: 'verify-checkpoint',
+      functionName: 'transfer-batch',
       functionArgs: [
-        stringAsciiCV(productId),
-        uintCV(checkpointId)
+        uintCV(batchId),
+        principalCV(newOwner)
       ],
-      network: 'testnet', // Use string instead of network object
+      network: 'testnet',
       onFinish: (data) => {
-        console.log('Verification Transaction ID:', data.txId);
+        console.log('Batch transferred. Transaction ID:', data.txId);
         return data.txId;
       },
       onCancel: () => {
-        throw new Error('Verification cancelled');
+        throw new Error('Transaction cancelled');
       },
     });
 
-    return 'Verification initiated';
+    return 'Batch transfer initiated';
   } catch (error) {
-    console.error('Error verifying checkpoint:', error);
+    console.error('Error transferring batch:', error);
     throw error;
   }
 };
 
-export const getProductFromStacks = async (productId: string) => {
+export const assignRole = async (userAddress: string, role: string): Promise<string> => {
+  if (!userSession.isUserSignedIn()) {
+    throw new Error('User not signed in');
+  }
+
+  try {
+    await openContractCall({
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'assign-role',
+      functionArgs: [
+        principalCV(userAddress),
+        stringAsciiCV(role)
+      ],
+      network: 'testnet',
+      onFinish: (data) => {
+        console.log('Role assigned. Transaction ID:', data.txId);
+        return data.txId;
+      },
+      onCancel: () => {
+        throw new Error('Transaction cancelled');
+      },
+    });
+
+    return 'Role assignment initiated';
+  } catch (error) {
+    console.error('Error assigning role:', error);
+    throw error;
+  }
+};
+
+export const getBatchFromStacks = async (batchId: number) => {
   try {
     // This would require a read-only function call to the contract
     // For now, we'll return a mock response
-    console.log('Getting product from Stacks:', productId);
+    console.log('Getting batch from Stacks:', batchId);
     return {
-      productId,
-      farmer: 'SP...',
-      currentStage: 'retail',
-      checkpoints: []
+      batchId,
+      product: 'Organic Tomatoes',
+      origin: 'SP...',
+      owner: 'SP...',
+      createdAt: Date.now()
     };
   } catch (error) {
-    console.error('Error getting product from Stacks:', error);
+    console.error('Error getting batch from Stacks:', error);
+    throw error;
+  }
+};
+
+export const getBatchHistory = async (batchId: number) => {
+  try {
+    // This would require multiple read-only function calls
+    console.log('Getting batch history for:', batchId);
+    return [
+      { owner: 'SP...farmer', blockHeight: 123456 },
+      { owner: 'SP...processor', blockHeight: 123460 },
+      { owner: 'SP...retailer', blockHeight: 123465 }
+    ];
+  } catch (error) {
+    console.error('Error getting batch history:', error);
     throw error;
   }
 };
@@ -136,3 +151,5 @@ export const getStacksAddress = (): string | null => {
   const userData = userSession.loadUserData();
   return userData.profile.stxAddress.testnet;
 };
+
+export { userSession };
