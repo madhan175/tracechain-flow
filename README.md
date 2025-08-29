@@ -318,7 +318,7 @@ If you have any questions or need help, please:
 
 **Built with ❤️ for transparent food supply chains worldwide.**
 
-![Food Supply Chain Demo](https://via.placeholder.com/800x400/2D50FC/FFFFFF?text=Food+Supply+Chain+Demo+Screenshot)
+![Food Supply Chain Demo](https://drive.google.com/file/d/1WzDrXYHwIPeKnvQz5kV8rw7hdpq3pIA7/view?usp=drivesdk)
 
 ---
 
